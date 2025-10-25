@@ -88,7 +88,6 @@ int main(int argc, char *argv[]){ //char **argv
     //compensar residuo
     myupper = upper;
   }
-
   long found = 0;
 
   MPI_Irecv(&found, 1, MPI_LONG, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &req);
