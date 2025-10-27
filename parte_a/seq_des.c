@@ -114,9 +114,10 @@ void decrypt(char *ciph, char *rslt, char *_key, int len){
         DES_set_odd_parity(&key);
     }
 
-    if (DES_set_key_checked(&key, &schedule) != 0) {
-        return; // Invalid key
-    }
+    //if (DES_set_key_checked(&key, &schedule) != 0) {
+    //    return; // Invalid key
+    //}
+    DES_set_key_unchecked(&key, &schedule); //(no valida “weak keys” y evita overhead).
 
     int blocks = len/8;
     int rem = len%8;
