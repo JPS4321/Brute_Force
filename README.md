@@ -41,11 +41,11 @@ Para este programa se necesitan tener archivos de texto que contengan el conteni
 - Desencriptar (dada una llave)
     `crypt_source.txt` deberia tener un mesaje encriptado, preferiblemente en formato "142 30 32 152" para evitar hacernos rollos con hexadecimal y ascii.
     ```
-        ./bin/seq crypt_source.txt decrpyt <key>
+        ./bin/seq crypt_source.txt decrypt <key>
     ```
 - Naive Bruteforce (dado un termino de busqueda)
     Necesita un `crypt_source.txt` y el search term que sea algo reconocible del mensaje original. Para el ejemplo de "hola mundo!" el search term podria ser cualquier segmento como "ola m" o "mundo" o "hola", etc.
     ```
-        ./bin/eq crypt_source.txt naive <search_term>
+        ./bin/seq crypt_source.txt naive <search_term>
     ```
 
