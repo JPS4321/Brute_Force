@@ -163,7 +163,7 @@ int main(int argc, char *argv[]){
 
     // Read source file
     FILE *f = fopen(filename, "rb");
-    if (!file) {
+    if (!f) {
         perror("Error opening file");
         return 1;
     }
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]){
     }
     size_t bytes_read = fread(ciph, 1, file_size, f);
     ciph[bytes_read] = '\0';
-    fclose(file);
+    fclose(f);
 
 
     // Actual Program
