@@ -48,4 +48,20 @@ Para este programa se necesitan tener archivos de texto que contengan el conteni
     ```
         ./bin/seq crypt_source.txt naive <search_term>
     ```
+### mpi_des.c (versión paralela)
+Para corre este, se debe estar en la carpeta parte_b y crear la carpeta bin cómo en la parte a
+```
+mpicc -O2 -Wall -o bin/mpi mpi_des.c -lcrypt
+```
+Para este programa se necesitan tener archivos de texto que contengan el contenido indicado
 
+- Encriptar (dada una llave)
+  `plain_source.txt` deberia de tener un mensaje identificable, como "hola mundo!"
+  ```
+    ./bin/mpi plain_source.txt encrypt <key>
+  ```
+- Naive Bruteforce (dado un termino de busqueda)
+    Necesita un `crypt_source.txt` y el search term que sea algo reconocible del mensaje original. Para el ejemplo de "hola mundo!" el search term podria ser cualquier segmento como "ola m" o "mundo" o "hola", etc. Y agregar la cantidad de procesos qué se desean correr.
+    ```
+      mpirun -np <n procesos> ./bin/mpi crypt_source.txt naive <search_term>
+    ```
