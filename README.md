@@ -51,7 +51,7 @@ Para este programa se necesitan tener archivos de texto que contengan el conteni
 ### mpi_des.c (versión paralela)
 Para corre este, se debe estar en la carpeta parte_b y crear la carpeta bin cómo en la parte a
 ```
-mpicc -O2 -Wall -o bin/mpi mpi_des.c -lcrypt
+mpicc -O2 -Wall -o bin/mpi mpi_des.c -lcrypto
 ```
 Para este programa se necesitan tener archivos de texto que contengan el contenido indicado
 
