@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 
     //El master asigna bloques de keys a los workers y recibe resultados.
     if (rank == 0) {
-        uint64_t current_key = 0; 
+        uint64_t current_key = 0; // 
         uint64_t found_key = UINT64_MAX; 
 
         int active_workers = size - 1;
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
 
             printf("# === Configurations === #\n");
             printf("Processes: %d\n", size);
-            printf("Mode: windowed-random\n");
+            printf("Mode: master-worker\n");
             printf("Search Term: '%s'\n", search_term);
             printf("Cypher Len: %d bytes\n\n", len);
             printf("Cypher:");
@@ -174,8 +174,7 @@ int main(int argc, char *argv[]) {
                 printf(" %u", (unsigned char)ciph[i]);
             printf("\n\n");
 
-            printf("Window size: %llu keys (%.2f million keys)\n\n", BLOCK_SIZE,
-                BLOCK_SIZE / 1e6);
+
 
             printf("# === MPI BRUTE RESULT === #\n");
             printf("Key found: %llu (0x%llX)\n\n",

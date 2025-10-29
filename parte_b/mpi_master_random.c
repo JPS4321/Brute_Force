@@ -11,6 +11,8 @@
 #define TAG_WORK 1
 #define TAG_STOP 3
 
+//Convierte un entero de 56 bits a una clave DES que si se pueda usar.
+
 void u64_to_desblock(uint64_t keynum, DES_cblock out) {
     keynum &= ((1ULL << 56) - 1);
     for (int i = 0; i < 8; ++i)
@@ -18,6 +20,7 @@ void u64_to_desblock(uint64_t keynum, DES_cblock out) {
     DES_set_odd_parity(out);
 }
 
+//Prueba las keys sobre el texto cifrado, devuelve 1 si encuentra la cadena buscada sino 0.
 int tryKey(uint64_t key, char *ciph, char *search, int len) {
     char temp[len + 1];
     memcpy(temp, ciph, len);
@@ -37,6 +40,7 @@ int tryKey(uint64_t key, char *ciph, char *search, int len) {
     return strstr(temp, search) != NULL;
 }
 
+//Funcion para hacer shuffle al array de bloques de keys.
 void shuffle_u64(uint64_t *a, uint64_t n, unsigned int *seedp) {
     if (n <= 1) return;
     for (uint64_t i = n - 1; i > 0; --i) {
@@ -55,7 +59,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     double start_time = 0.0, end_time = 0.0;
-
+    //Validacion de argumentos del comando
     if (argc < 3) {
         if (rank == 0)
             fprintf(stderr, "Uso: mpirun -np <n> ./mpi_windowed_clean <cipher.txt> <search_term> [window_size_in_keys]\n");
@@ -65,7 +69,7 @@ int main(int argc, char *argv[]) {
 
     const char *filename = argv[1];
     const char *search = argv[2];
-
+    //Tamaño de la ventana (por defecto 2^24 keys) tho es configurable.
     uint64_t default_window_keys = (1ULL << 24);
     uint64_t window_keys = default_window_keys;
     if (argc >= 4) {
@@ -77,7 +81,7 @@ int main(int argc, char *argv[]) {
 
     char *ciph = NULL;
     int len = 0;
-
+    //El master lee el archivo cifrado y lo convierte a bytes.
     if (rank == 0) {
         FILE *f = fopen(filename, "rb");
         if (!f) { perror("Error opening file"); MPI_Abort(MPI_COMM_WORLD, 1); }
@@ -125,7 +129,7 @@ int main(int argc, char *argv[]) {
                window_keys / 1e6);
         fflush(stdout);
     }
-
+    // envio de datos generales a todos los workers (Longitud y contenido del texto cifrado y de la cadena buscada)
     MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (rank != 0) {
         ciph = malloc(len);
@@ -140,10 +144,13 @@ int main(int argc, char *argv[]) {
     if (rank == 0) strncpy(search_term, search, search_len);
     MPI_Bcast(search_term, search_len, MPI_CHAR, 0, MPI_COMM_WORLD);
 
+    //Sincronizacion antes de empezar el conteo de tiempo.
     MPI_Barrier(MPI_COMM_WORLD);
     if (rank == 0) start_time = MPI_Wtime();
 
+    //Parte del master, es decir su rank es 0.
     if (rank == 0) {
+        //Dividir el espacio de keys en ventanas y bloques aleatorios dentro de cada ventana.
         unsigned int seed = (unsigned int)time(NULL);
         uint64_t window_start = 0;
         uint64_t found_key = UINT64_MAX;
@@ -151,7 +158,7 @@ int main(int argc, char *argv[]) {
         uint64_t *block_starts = NULL;
         uint64_t blocks_in_window = 0;
         uint64_t next_block = 0;
-
+        //Loop de ventanas hasta encontrar la key o agotar el espacio.
         while (window_start < full_space && found_key == UINT64_MAX) {
             uint64_t rem_keys = full_space - window_start;
             uint64_t keys_in_this_window = rem_keys < window_keys ? rem_keys : window_keys;
@@ -165,7 +172,8 @@ int main(int argc, char *argv[]) {
 
             for (uint64_t i = 0; i < blocks_in_window; ++i)
                 block_starts[i] = i * BLOCK_SIZE;
-
+            
+            //Hacer shuffle a los bloques dentro de la ventana.
             shuffle_u64(block_starts, blocks_in_window, &seed);
             next_block = 0;
 
@@ -200,7 +208,7 @@ int main(int argc, char *argv[]) {
             if (window_start >= full_space) break;
         }
 
-        // OUTPUT: RESULTADOS
+        // Mostrar resultados si se encontró la clave
         printf("\n# === MPI BRUTE RESULT === #\n");
         if (found_key != UINT64_MAX) {
             printf("Key found: %llu (0x%llX)\n", 
