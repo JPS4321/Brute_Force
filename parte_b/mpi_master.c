@@ -109,8 +109,8 @@ int main(int argc, char *argv[]) {
 
     //El master asigna bloques de keys a los workers y recibe resultados.
     if (rank == 0) {
-        uint64_t current_key = 0; //Primera key a probar
-        uint64_t found_key = UINT64_MAX; //Marcador de key no encontrada
+        uint64_t current_key = 0; 
+        uint64_t found_key = UINT64_MAX; 
 
         int active_workers = size - 1;
 
