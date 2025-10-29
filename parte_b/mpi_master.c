@@ -147,12 +147,53 @@ int main(int argc, char *argv[]) {
 
         // Mostrar resultados
         if (found_key != UINT64_MAX) {
-            printf("\n[MASTER] Clave encontrada: %llu (0x%llX)\n",
-                   (unsigned long long)found_key,
-                   (unsigned long long)found_key);
+            // Descifrar el mensaje con la clave encontrada
+            DES_cblock des_key;
+            u64_to_desblock(found_key, des_key);
+            DES_key_schedule schedule;
+            DES_set_key_checked(&des_key, &schedule);
+
+            char decrypted[len + 1];
+            memcpy(decrypted, ciph, len);
+            decrypted[len] = 0;
+
+            int blocks = len / 8;
+            for (int i = 0; i < blocks; ++i) {
+                DES_ecb_encrypt((const_DES_cblock *)(decrypted + i * 8),
+                                (DES_cblock *)(decrypted + i * 8),
+                                &schedule, DES_DECRYPT);
+            }
+
+            printf("# === Configurations === #\n");
+            printf("Processes: %d\n", size);
+            printf("Mode: windowed-random\n");
+            printf("Search Term: '%s'\n", search_term);
+            printf("Cypher Len: %d bytes\n\n", len);
+            printf("Cypher:");
+            for (int i = 0; i < len; ++i)
+                printf(" %u", (unsigned char)ciph[i]);
+            printf("\n\n");
+
+            printf("Window size: %llu keys (%.2f million keys)\n\n", BLOCK_SIZE,
+                BLOCK_SIZE / 1e6);
+
+            printf("# === MPI BRUTE RESULT === #\n");
+            printf("Key found: %llu (0x%llX)\n\n",
+                (unsigned long long)found_key,
+                (unsigned long long)found_key);
+
+            printf("~ Key found:");
+            for (int i = 0; i < 8; ++i)
+                printf(" %u", (unsigned char)des_key[i]);
+            printf("\n");
+
+            printf("~ Message: %s\n\n", decrypted);
         } else {
             printf("[MASTER] No se encontró clave en el espacio explorado.\n");
         }
+
+
+        
     }
 
     //Parte de los workers, es decir su rank es distinto de 0.
@@ -163,6 +204,8 @@ int main(int argc, char *argv[]) {
         while (1) {
             MPI_Recv(&key_start, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_STOP) break;
+            
+
 
             uint64_t result = UINT64_MAX;
             for (uint64_t k = key_start; k < key_start + BLOCK_SIZE; k++) {

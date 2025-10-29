@@ -218,10 +218,10 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < len / 8; ++i)
                 DES_ecb_encrypt((const_DES_cblock *)(message + i * 8), (DES_cblock *)(message + i * 8), &schedule, DES_DECRYPT);
 
-            printf("\n~ Key found:");
+            printf("\n Key found:");
             for (int i = 0; i < 8; ++i)
                 printf(" %u", (unsigned char)((found_key >> (56 - 8 * (i + 1))) & 0xFF));
-            printf("\n~ Message: %s\n", message);
+            printf("\n Message: %s\n", message);
             free(message);
         } else {
             printf("Key not found in entire keyspace.\n");
